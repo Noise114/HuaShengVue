@@ -51,7 +51,7 @@ export default {
     // 图片数量限制
     limit: {
       type: Number,
-      default: 5,
+      default: 1,
     },
     // 大小限制(MB)
     fileSize: {
@@ -171,7 +171,7 @@ export default {
       if (findex > -1) {
         this.fileList.splice(findex, 1);
         this.$emit("input", this.listToString(this.fileList));
-      }
+      } 
     },
     // 上传失败
     handleUploadError() {
