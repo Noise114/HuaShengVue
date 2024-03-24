@@ -143,7 +143,15 @@
             icon="el-icon-view"
             @click="handleView(scope.row,scope.index)"
             v-hasPermi="['huasheng:data:query']"
-          >详细</el-button>
+          >详细</el-button>         
+          <el-button
+            type="text"
+            size="small"
+            icon="el-icon-download"
+            @click="handleDownLoad(scope.row)"
+            v-hasPermi="['huasheng:data:query']"
+          >图片下载</el-button>
+       
           </template>
         </el-table-column>
       </el-table>
@@ -161,9 +169,9 @@
         <el-form ref="form" :model="form" :rules="rules" label-width="120px">
         <el-row>
         <el-col :span="12">
-          <el-form-item label="手机型号">
+          <el-form-item label="手机型号" prop="selectedModel">
           <el-select  
-          v-model="selectedModel" 
+          v-model="form.selectedModel" 
           filterable 
           remote 
           clearable 
@@ -183,9 +191,9 @@
         </el-col>
 
         <el-col :span="12">
-          <el-form-item label="游戏名称">
+          <el-form-item label="游戏名称" prop="selectedGame">
           <el-select  
-          v-model="selectedGame" 
+          v-model="form.selectedGame" 
           filterable 
           remote 
           clearable 
@@ -205,27 +213,27 @@
         </el-col>
         <el-col :span="12">
           <el-form-item label="游戏帧率" prop="frameRate">
-            <el-input v-model="form.frameRate" placeholder="请输入帧率" :disabled="isDisabled && shouldDisable1" clearable style="width: 225px ;"/>
+            <el-input v-model="form.frameRate" type="number" placeholder="请输入帧率" :disabled="isDisabled && shouldDisable1" clearable style="width: 225px ;"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="游戏功耗" prop="powerConsumption">
-            <el-input v-model="form.powerConsumption" placeholder="请输入功耗" :disabled="isDisabled && shouldDisable2" clearable style="width: 225px ;"/>
+            <el-input v-model="form.powerConsumption" type="number"  placeholder="请输入功耗" :disabled="isDisabled && shouldDisable2" clearable style="width: 225px ;"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="正面温度" prop="temperatureFront">
-            <el-input v-model="form.temperatureFront" placeholder="请输入正面温度" :disabled="isDisabled && shouldDisable3" clearable style="width: 225px ;"/>
+            <el-input v-model="form.temperatureFront" type="number" placeholder="请输入正面温度" :disabled="isDisabled && shouldDisable3" clearable style="width: 225px ;"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">
          <el-form-item label="侧面温度" prop="temperatureSide">
-            <el-input v-model="form.temperatureSide" placeholder="请输入侧面温度" :disabled="isDisabled && shouldDisable4" clearable style="width: 225px ;"/>
+            <el-input v-model="form.temperatureSide" type="number" placeholder="请输入侧面温度" :disabled="isDisabled && shouldDisable4" clearable style="width: 225px ;"/>
           </el-form-item>
         </el-col>
         <el-col :span="12">
           <el-form-item label="背面温度" prop="temperatureBack">
-            <el-input v-model="form.temperatureBack" placeholder="请输入背面温度" :disabled="isDisabled && shouldDisable5" clearable style="width: 225px ;"/>
+            <el-input v-model="form.temperatureBack" type="number" placeholder="请输入背面温度" :disabled="isDisabled && shouldDisable5" clearable style="width: 225px ;"/>
           </el-form-item>  
         </el-col>
         <el-col :span="12">
@@ -264,7 +272,7 @@
   </template>
   
   <script>
-  import { listData, getData, delData, addData, updateData ,uploadImage} from "@/api/huasheng/game";
+  import { listData, getData, delData, addData, updateData ,uploadImage,download} from "@/api/huasheng/game";
   import { queryMoblie,queryGame } from "@/api/huasheng/common";
   export default {
     name: "Data",
@@ -308,14 +316,23 @@
           updateDate: null
         },
         // 表单参数
-        form: {},
+        form: {
+          selectedModel: null,
+          selectedGame: null,
+          modelId:null
+        },
         // 表单校验
         rules: {
+          selectedModel: [
+          { required: true, message: "手机型号不能为空", trigger: "blur" }
+        ],
+        selectedGame: [
+          { required: true, message: "游戏名称不能为空", trigger: "blur" }
+        ]
         },
         //机型选择器
         selectedModel:'',
         modelOptions :[],
-        loading :false,
         //游戏选择器
         selectedGame:'',
         gameOptions:[],
@@ -347,7 +364,6 @@
           console.error('Error fetching mobile info',error);
           this.loading=false;
         }); 
-      
       },
 
       /** 获取游戏列表下拉框 */
@@ -361,8 +377,7 @@
        .catch(error=>{
           console.error('Error fetching game info',error);
           this.loading=false;
-        }); 
-      
+        });       
       },
 
     /** 查询游戏性能列表 */
@@ -425,17 +440,51 @@
         this.selectedGame=null;
         this.open = true;
         this.isEditing=true;
-        this.disabled=true;
+        this.isDisabled=false;
+        this.shouldDisable1=false; // 控制属性1是否禁用  
+        this.shouldDisable2=false; // 控制属性1是否禁用  
+        this.shouldDisable3=false; // 控制属性1是否禁用  
+        this.shouldDisable4=false; // 控制属性1是否禁用  
+        this.shouldDisable5=false;// 控制属性1是否禁用 
         this.title = "添加游戏性能";
        
       },
+
+      handleDownLoad(row){
+        let formData = { 
+            frameRateImageUrl: row.frameRateImageUrl,
+            powerConsumptionImageUrl: row.powerConsumptionImageUrl,
+            temperatureFrontImageUrl: row.temperatureFrontImageUrl,
+            temperatureSideImageUrl: row.temperatureSideImageUrl,
+            temperatureBackImageUrl: row.temperatureBackImageUrl
+        };
+        download(formData).then(blob => {  
+    // 可以在这里检查blob.type是否为'application/zip'（如果服务器返回正确的MIME类型）  
+      
+    const link = document.createElement('a');  
+    const url = window.URL.createObjectURL(blob); // 创建blob的URL  
+    const name=row.modelName;
+    const gname=row.gameName;
+    link.href = url;  
+    link.download = name+'_'+gname+'.zip'; // 设置下载文件名  
+    document.body.appendChild(link);  
+    link.click(); // 模拟点击触发下载  
+    document.body.removeChild(link); // 下载后移除元素  
+    window.URL.revokeObjectURL(url); // 正确释放URL对象  
+  }).catch(error => {  
+    console.error('下载出错：', error);  
+    // 在这里添加用户反馈，比如显示错误消息  
+  });  
+      },
+
+
       /** 修改按钮操作 */
       handleUpdate(row) {
         const id = row.id || this.ids
         getData(id).then(response => {
           this.form = response.data;
-          this.selectedModel = this.form.modelName;
-          this.selectedGame=this.form.gameName;
+          this.form.selectedModel=this.form.modelId;
+          this.form.selectedGame=this.form.gameId;
           this.open = true;
           this.isEditing=true;
           this.isDisabled=true;
@@ -452,8 +501,8 @@
         this.$refs["form"].validate(valid => {
           if (valid) {
             let formData = {  
-            modelId: this.selectedModel, // 将选中的 modelId 包含进来  
-            gameId:this.selectedGame, 
+            modelId:this.form.selectedModel, // 将选中的 modelId 包含进来  
+            gameId:this.form.selectedGame, 
             frameRate: this.form.frameRate,
             powerConsumption: this.form.powerConsumption,
             frameRateImageUrl: this.form.frameRateImageUrl,
@@ -496,11 +545,16 @@
        /** 详细按钮操作 */
     handleView(row) {
       this.form = row;
-      this.selectedModel = this.form.modelName;
-      this.selectedGame=this.form.gameName;
+      this.form.selectedModel=this.form.modelId;
+      this.form.selectedGame=this.form.gameId;
       this.open = true;
       this.isEditing=false;
       this.isDisabled=true;
+      this.shouldDisable1=true; // 控制属性1是否禁用  
+      this.shouldDisable2=true; // 控制属性1是否禁用  
+      this.shouldDisable3=true; // 控制属性1是否禁用  
+      this.shouldDisable4=true; // 控制属性1是否禁用  
+      this.shouldDisable5=true;// 控制属性1是否禁用  
       this.title = "游戏性能详情";
     },
 

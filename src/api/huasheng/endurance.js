@@ -12,7 +12,7 @@ export function listPost(query) {
 // 查询耗电数据详细
 export function getPost(id) {
   return request({
-    url: '/huasheng/endurance' + id,
+    url: '/huasheng/endurance/' + id,
     method: 'get'
   })
 }
@@ -38,7 +38,7 @@ export function updatePost(data) {
 // 删除耗电数据
 export function delPost(id) {
   return request({
-    url: '/huasheng/endurance' + id,
+    url: '/huasheng/endurance/' + id,
     method: 'delete'
   })
 }

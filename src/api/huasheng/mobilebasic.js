@@ -12,7 +12,7 @@ export function listData(query) {
 // 查询【请填写功能名称】详细
 export function getData(modelId) {
   return request({
-    url: '/huasheng/mobilebasic' + modelId,
+    url: '/huasheng/mobilebasic/' + modelId,
     method: 'get'
   })
 }
@@ -29,7 +29,7 @@ export function addData(data) {
 // 修改【请填写功能名称】
 export function updateData(data) {
   return request({
-    url: '/huasheng/mobilebasic',
+    url: '/huasheng/mobilebasic/',
     method: 'put',
     data: data
   })

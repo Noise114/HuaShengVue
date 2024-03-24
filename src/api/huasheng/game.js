@@ -51,3 +51,17 @@ export function uploadImage(data) {
     })
   }
  
+  export function download(data) {
+    return request({
+      url: '/huasheng/game/downLoadPicture',
+      method: 'post',
+      responseType: 'blob',
+      data: data
+    }).then(response => {  
+      // 如果需要，可以在这里检查HTTP状态码  
+      if (!response.ok) {  
+        throw new Error('HTTP error ' + response.status);  
+      }  
+      return response.data; // 返回blob数据供后续使用  
+    });  
+  }

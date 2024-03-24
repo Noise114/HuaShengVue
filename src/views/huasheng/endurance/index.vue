@@ -89,72 +89,81 @@
     />
 
     <!-- 添加或修改机型对话框 -->
-    <el-dialog :title="title" :visible.sync="open" width="70%" append-to-body>
+    <el-dialog :title="title" :visible.sync="open" width="60%" append-to-body>
         <el-row :gutter="15">
           <el-form ref="form" :model="form" :rules="rules" size="medium" label-width="100px">
-            <el-col :span="12">
-              <el-form-item label="机型名称" prop="brandName">
-                <el-input v-model="form.brandName" placeholder="请输入机型名称" clearable :style="{width: '100%'}">
-                </el-input>
-              </el-form-item>
-            </el-col>
-            <el-col :span="12">
-              <el-form-item label="芯片名称" prop="chipName">
-                <el-input v-model="form.chipName" placeholder="请输入芯片名称" clearable :style="{width: '100%'}">
-                </el-input>
-              </el-form-item>
-            </el-col>
+          <el-col :span="12">
+          <el-form-item label="手机型号" prop="selectedModel">
+          <el-select  
+          v-model="form.selectedModel" 
+          filterable 
+          remote 
+          clearable 
+          placeholder="请选择手机型号" 
+          :remote-method="remoteMethod"
+          :loading="loading"
+          :disabled="isDisabled"
+          >
+          <el-option
+               v-for="item in modelOptions"
+              :key="item.modelId"
+              :label="item.modelName"
+              :value="item.modelId">
+          </el-option>
+        </el-select>
+        </el-form-item>
+        </el-col>
             <el-col :span="12">
               <el-form-item label="王者耗电" prop="aov">
-                <el-input v-model="form.aov" placeholder="请输入王者耗电" clearable :style="{width: '100%'}">
+                <el-input v-model="form.aov" type="number" placeholder="请输入王者耗电" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="原神耗电" prop="gi">
-                <el-input v-model="form.gi" placeholder="请输入原神耗电" clearable :style="{width: '100%'}">
+                <el-input v-model="form.gi" type="number" placeholder="请输入原神耗电" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="拍照耗电" prop="camera">
-                <el-input v-model="form.camera" placeholder="请输入拍照耗电" clearable :style="{width: '100%'}">
+                <el-input v-model="form.camera"  type="number" placeholder="请输入拍照耗电" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="B站耗电" prop="bilibili">
-                <el-input v-model="form.bilibili" placeholder="请输入B站耗电" clearable :style="{width: '100%'}">
+                <el-input v-model="form.bilibili" type="number" placeholder="请输入B站耗电" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="待机耗电" prop="standby">
-                <el-input v-model="form.standby" placeholder="请输入待机耗电" clearable :style="{width: '100%'}">
+                <el-input v-model="form.standby" type="number" placeholder="请输入待机耗电" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="微博耗电" prop="weibo">
-                <el-input v-model="form.weibo" placeholder="请输入微博耗电" clearable :style="{width: '100%'}">
+                <el-input v-model="form.weibo" type="number" placeholder="请输入微博耗电" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="吃鸡耗电" prop="chicken">
-                <el-input v-model="form.chicken" placeholder="请输入吃鸡耗电" clearable :style="{width: '100%'}">
+                <el-input v-model="form.chicken" type="number" placeholder="请输入吃鸡耗电" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
               <el-form-item label="剩余电量" prop="residue">
-                <el-input v-model="form.剩余电量" placeholder="请输入剩余电量" clearable :style="{width: '100%'}">
+                <el-input v-model="form.residue" type="number" placeholder="请输入剩余电量" clearable :style="{width: '225px'}">
                 </el-input>
               </el-form-item>
             </el-col>
             <el-col :span="12">
             <el-form-item label="手机类型" prop="phoneType">
-              <el-select v-model="queryParams.phoneType" placeholder="手机类型" clearable :style="{width: '100%'}">
+              <el-select v-model="form.phoneType" placeholder="手机类型" clearable :disabled="isDisabled" :style="{width: '225px'}">
                 <el-option
                 v-for="(item, index) in phoneTypeOptions"
                :key="index"
@@ -164,12 +173,6 @@
             </el-select>
            </el-form-item>
           </el-col>
-            <el-col :span="12">
-              <el-form-item label="创建日期" prop="createTime">
-                <el-date-picker v-model="form.createTime" format="yyyy-MM-dd hh:mm:ss" value-format="yyyy-MM-dd hh:mm:ss"
-                  :style="{width: '100%'}" placeholder="请选择创建日期" clearable></el-date-picker>
-              </el-form-item>
-            </el-col>
           </el-form>
         </el-row>
         <div slot="footer">
@@ -182,7 +185,7 @@
 
 <script>
 import { listPost, getPost, delPost, addPost, updatePost } from "@/api/huasheng/endurance";
-
+import { queryMoblie } from "@/api/huasheng/common";
 export default {
   name: "Post",
   dicts: ['sys_normal_disable'],
@@ -216,65 +219,21 @@ export default {
 
       },
       // 表单参数
-      form: {},
+      form: {
+        selectedModel: null,
+      },
+      //机型选择器
+      selectedModel:'',
+      modelOptions :[],
+      isDisabled: false,
       // 表单校验
       rules: {
-          brandName: [{
-            required: true,
-            message: '请输入机型名称',
-            trigger: 'blur'
-          }],
-          chipName: [{
-            required: true,
-            message: '请输入芯片名称',
-            trigger: 'blur'
-          }],
-          aov: [{
-            required: true,
-            message: '请输入王者耗电',
-            trigger: 'blur'
-          }],
-          gi: [{
-            required: true,
-            message: '请输入原神耗电',
-            trigger: 'blur'
-          }],
-          camera: [{
-            required: true,
-            message: '请输入拍照耗电',
-            trigger: 'blur'
-          }],
-          bilibili: [{
-            required: true,
-            message: '请输入B站耗电',
-            trigger: 'blur'
-          }],
-          standby: [{
-            required: true,
-            message: '请输入待机耗电',
-            trigger: 'blur'
-          }],
-          weibo: [{
-            required: true,
-            message: '请输入微博耗电',
-            trigger: 'blur'
-          }],
-          chicken: [{
-            required: true,
-            message: '请输入吃鸡耗电',
-            trigger: 'blur'
-          }],
-          residue: [{
-            required: true,
-            message: '请输入剩余电量',
-            trigger: 'blur'
-          }],
-
-          createTime: [{
-            required: true,
-            message: '请选择创建日期',
-            trigger: 'change'
-          }],
+        selectedModel: [
+          { required: true, message: "手机型号不能为空", trigger: "blur" }
+        ],
+        phoneType: [
+          { required: true, message: "手机类型不能为空", trigger: "blur" }
+        ],
         },
         phoneTypeOptions: [{
           "label": "直板机",
@@ -285,15 +244,29 @@ export default {
         }, {
           "label": "平板电脑",
           "value": 3
-        }],
+        }]
     };
   },
 
   created() {
     this.getList();
+    this.remoteMethod();
   },
 
   methods: {
+    /** 获取手机列表下拉框 */
+     remoteMethod(query){
+        this.loading= true;
+         queryMoblie(query)
+        .then(response=>{
+         this.modelOptions=response.data;
+         this.loading=false;
+       })
+       .catch(error=>{
+          console.error('Error fetching mobile info',error);
+          this.loading=false;
+        }); 
+      },
     /** 查询续航数据列表 */
     getList() {
       this.loading = true;
@@ -336,14 +309,16 @@ export default {
     },
     // 多选框选中数据
     handleSelectionChange(selection) {
-      this.ids = selection.map(item => item.postId)
-      this.single = selection.length!=1
-      this.multiple = !selection.length
-    },
+        this.ids = selection.map(item => item.id)
+        this.single = selection.length!==1
+        this.multiple = !selection.length
+      },
     /** 新增按钮操作 */
     handleAdd() {
-      this.reset();
+      this.isDisabled=false;
+      this.selectedModel=null;
       this.open = true;
+      this.reset();
       this.title = "添加数据";
     },
     /** 修改按钮操作 */
@@ -351,6 +326,7 @@ export default {
       this.reset();
       const id = row.id || this.ids
       getPost(id).then(response => {
+        this.isDisabled=true;
         this.form = response.data;
         this.open = true;
         this.title = "修改数据";
@@ -360,7 +336,7 @@ export default {
     submitForm: function() {
       this.$refs["form"].validate(valid => {
         if (valid) {
-          if (this.form.postId != undefined) {
+          if (this.form.id != undefined) {
             updatePost(this.form).then(response => {
               this.$modal.msgSuccess("修改成功");
               this.open = false;
@@ -380,16 +356,14 @@ export default {
     handleDelete(row) {
       const id = row.id || this.ids;
       const brandName = row.brandName;
-      this.$modal.confirm('是否确认删除' + brandName + '的数据？').then(function() {
-        return delPost(postIds);
+      this.$modal.confirm('是否确认删除数据？').then(function() {
+        return delPost(id);
       }).then(() => {
         this.getList();
         this.$modal.msgSuccess("删除成功");
       }).catch(() => {});
     },
-
   }
-
 };
 
 
